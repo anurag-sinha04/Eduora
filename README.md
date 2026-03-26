@@ -22,7 +22,7 @@ Most systems only provide basic captions and fail to adapt how content is delive
 
 ## 💡 Solution
 
-Adaptora transforms learning by dynamically adapting content based on the user’s needs.
+Eduora transforms learning by dynamically adapting content based on the user’s needs.
 
 > 🏆 *“We don’t just make education accessible — we make it adaptable.”*
 
@@ -63,7 +63,7 @@ Supports multiple languages for inclusive learning.
 
 ## 🧠 AI Integration
 
-Adaptora uses AI to:
+Eduora uses AI to:
 - Simplify complex educational content  
 - Generate summaries  
 - Improve learning comprehension  
