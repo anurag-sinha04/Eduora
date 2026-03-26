@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Support | Eduora</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background: #050608;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .mic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #6366f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.5); }
+            70% { box-shadow: 0 0 0 30px rgba(99,102,241,0); }
+            100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 12px 20px;
+            background: #6366f1;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Visual Support Mode</h1>
+    <p id="status">Tap anywhere to start</p>
+
+    <div class="mic">🎤</div>
+
+    <button onclick="goBack()">Go Back</button>
+<script>
+let recognition;
+let isRunning = false;
+
+// ---------------- 🔊 SPEAK ----------------
+function speak(text) {
+    console.log("🔊 SYSTEM:", text);
+
+    window.speechSynthesis.cancel();
+
+    const msg = new SpeechSynthesisUtterance(text);
+
+    msg.rate = 0.9;
+    msg.pitch = 1;
+    msg.volume = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+
+    msg.voice =
+        voices.find(v => v.lang === "en-IN") ||
+        voices.find(v => v.name.includes("Google")) ||
+        voices[0];
+
+    window.speechSynthesis.speak(msg);
+}
+
+// ---------------- 🎤 RECOGNITION ----------------
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+
+    recognition.continuous = false; // 🔥 IMPORTANT (no permission loop)
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.lang = "en-IN";
+
+    recognition.onstart = () => {
+        console.log("🎤 Mic started");
+        isRunning = true;
+        document.getElementById("status").innerText = "Listening...";
+    };
+
+    recognition.onend = () => {
+        console.log("🎤 Mic stopped");
+        isRunning = false;
+    };
+
+    recognition.onerror = (e) => {
+        console.log("❌ Error:", e.error);
+    };
+
+    recognition.onresult = (event) => {
+        const result = event.results[event.results.length - 1];
+
+        if (!result.isFinal) return;
+
+        const text = result[0].transcript.toLowerCase().trim();
+
+        console.log("🎤 USER:", text);
+
+        document.getElementById("status").innerText = "Heard: " + text;
+
+        handleCommand(text);
+
+        // ✅ restart AFTER result (safe)
+        setTimeout(() => {
+            try {
+                recognition.start();
+            } catch (e) {
+                console.log("Restart blocked");
+            }
+        }, 800);
+    };
+} else {
+    alert("Speech recognition not supported");
+}
+
+// ---------------- 🧠 COMMAND HANDLER ----------------
+function handleCommand(text) {
+
+    // SIGN (handles misrecognition)
+    if (
+        text.includes("sign") ||
+        text.includes("sine") ||
+        text.includes("shine")
+    ) {
+        speak("Opening sign language");
+
+        setTimeout(() => {
+            window.location.href = "../hearing/hearing_impaired.html";
+        }, 1000);
+    }
+
+    // CALL
+    else if (text.includes("call") || text.includes("video")) {
+        speak("Opening video call");
+
+        setTimeout(() => {
+            window.location.href = "../hearing/home.html";
+        }, 1000);
+    }
+
+    // BACK
+    else if (text.includes("back") || text.includes("home")) {
+        speak("Going back");
+
+        setTimeout(() => {
+            window.location.href = "../index.html";
+        }, 1000);
+    }
+
+    // HELP
+    else if (text.includes("help")) {
+        speak("Say sign, call, or back.");
+    }
+
+    // UNKNOWN
+    else {
+        console.log("⚠️ No match:", text);
+        speak("Please say sign, call, or back.");
+    }
+}
+
+// ---------------- ▶ START SYSTEM ----------------
+window.addEventListener("click", () => {
+    if (!isRunning && recognition) {
+        try {
+            recognition.start();
+
+            setTimeout(() => {
+                speak("Voice started. Say sign, call, or back.");
+            }, 500);
+
+        } catch (e) {
+            console.log("Start error");
+        }
+    }
+});
+
+// ---------------- AUTO MESSAGE ----------------
+window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        speak("Welcome. Tap anywhere to enable voice.");
+    }, 1000);
+});
+
+// ---------------- NAV ----------------
+function goBack() {
+    window.location.href = "../index.html";
+}
+</script>
+</body>
+</html>

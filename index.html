@@ -149,8 +149,8 @@
                     <div class="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mb-8 border border-indigo-500/20 group-hover:bg-indigo-600 transition-all">
                 <i class="ph ph-eye"></i>
                     </div>
-                    <h3 class="text-3xl font-bold mb-4">Visual</h3>
-                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic underline text-indigo-400">Guidance You Can Trust, Without Vision.</p>
+                    <h3 class="text-3xl font-bold mb-4">Visual Support</h3>
+                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic text-amber-400">Guidance You Can Trust, Without Vision.</p>
                     <button class="mt-auto w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-bold group-hover:bg-indigo-600 transition-all">Choose Pathway</button>
                 </div>
 
@@ -158,8 +158,8 @@
                     <div class="w-20 h-20 bg-amber-500/10 rounded-3xl flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-600 transition-all">
                         <i class="ph ph-ear text-5xl text-amber-400 group-hover:text-white"></i>
                     </div>
-                    <h3 class="text-3xl font-bold mb-4">Audio</h3>
-                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic underline text-amber-400">Understanding Beyond Sound.</p>
+                    <h3 class="text-3xl font-bold mb-4">Hearing Support</h3>
+                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic  text-amber-400">Understanding Beyond Sound.</p>
                     <button class="mt-auto w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-bold group-hover:bg-amber-600 transition-all">Choose Pathway</button>
                 </div>
 
@@ -168,77 +168,142 @@
                         <i class="ph ph-brain text-5xl text-emerald-400 group-hover:text-white"></i>
                     </div>
                     <h3 class="text-3xl font-bold mb-4">Cognitive</h3>
-                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic underline text-emerald-400">Clarity in Every Interaction</p>
+                    <p class="text-gray-500 leading-relaxed mb-10 text-sm italic text-emerald-400">Clarity in Every Interaction</p>
                     <button class="mt-auto w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-bold group-hover:bg-emerald-600 transition-all">Choose Pathway</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const portal = document.getElementById('portal-overlay');
-        const voiceUI = document.getElementById('voice-ui');
-        const voiceFeedback = document.getElementById('voice-feedback');
+<script>
+    const portal = document.getElementById('portal-overlay');
+    const voiceUI = document.getElementById('voice-ui');
+    const voiceFeedback = document.getElementById('voice-feedback');
 
-        // Portal Functions
-        function openPortal() {
-            portal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            speak("Welcome to the selection portal. Say Visual, Audio, or Focus to choose your pathway.");
-        }
-        function closePortal() {
-            portal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+    let recognition;
+    let isListening = false;
 
-        // Voice Synthesis (TTS)
-        function speak(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.rate = 0.9;
-            window.speechSynthesis.speak(msg);
-        }
+    // -------------------------------
+    // PORTAL FUNCTIONS
+    // -------------------------------
+    function openPortal() {
+        portal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      speak(" How would you like us to support you today? Say Visual, Audio, or Cognitive.");
+    }
 
-        // Voice Recognition Logic
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
+    function closePortal() {
+        portal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 
-            recognition.onstart = () => {
-                voiceUI.style.opacity = '1';
-                console.log("Mic On");
-            };
+    // -------------------------------
+    // TEXT TO SPEECH (FIXED)
+    // -------------------------------
+    function speak(text) {
+        window.speechSynthesis.cancel(); // stop previous speech
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.rate = 0.9;
+        msg.pitch = 1;
+        msg.volume = 1;
 
-            recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-                voiceFeedback.innerText = transcript;
+        window.speechSynthesis.speak(msg);
+    }
 
-                if (transcript.includes("get started") || transcript.includes("portal")) {
-                    openPortal();
-                } else if (transcript.includes("visual")) {
-                    speak("Loading Visual Pathway");
-                    setTimeout(() => window.location.href = './visual/home.html', 1000);
-                } else if (transcript.includes("audio")) {
-                    speak("Loading Audio Pathway");
-                    setTimeout(() => window.location.href = './hearing/home.html', 1000);
-                } else if (transcript.includes("focus")) {
-                    speak("Loading Focus Pathway");
-                    setTimeout(() => window.location.href = './hearing/hearing_impaired.html', 1000);
-                } else if (transcript.includes("close") || transcript.includes("exit")) {
-                    closePortal();
-                }
-            };
+    // -------------------------------
+    // VOICE RECOGNITION SETUP
+    // -------------------------------
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-            // Start Assistant on first interaction
-            window.addEventListener('click', () => {
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            voiceUI.style.opacity = '1';
+            isListening = true;
+            console.log("🎤 Mic started");
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+
+            console.log("Heard:", transcript);
+            voiceFeedback.innerText = transcript;
+
+            handleCommand(transcript);
+        };
+
+        // 🔥 AUTO RESTART MIC (MOST IMPORTANT FIX)
+        recognition.onend = () => {
+            console.log("Mic restarted...");
+            if (isListening) {
                 recognition.start();
-                speak("Voice Assistant enabled. Say Get Started to begin.");
-            }, { once: true });
-        } else {
-            alert("Speech recognition not supported in this browser.");
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech error:", event.error);
+        };
+
+    } else {
+        alert("Speech recognition not supported in this browser.");
+    }
+
+    // -------------------------------
+    // COMMAND HANDLER (CLEAN)
+    // -------------------------------
+    function handleCommand(text) {
+        if (text.includes("get started") || text.includes("start") || text.includes("portal")) {
+            openPortal();
         }
-    </script>
+
+        else if (text.includes("visual")) {
+            speak("Loading Visual Pathway");
+            setTimeout(() => {
+                window.location.href = './visual/home.html';
+            }, 1500);
+        }
+
+        else if (text.includes("audio") || text.includes("hearing")) {
+            speak("Loading Audio Pathway");
+            setTimeout(() => {
+                window.location.href = './hearing/home.html';
+            }, 1500);
+        }
+
+        else if (text.includes("focus") || text.includes("cognitive")) {
+            speak("Loading Cognitive Pathway");
+            setTimeout(() => {
+                window.location.href = './hearing/hearing_impaired.html';
+            }, 1500);
+        }
+
+        else if (text.includes("close") || text.includes("exit")) {
+            speak("Closing portal");
+            closePortal();
+        }
+    }
+
+    // -------------------------------
+    // START VOICE ASSISTANT (STABLE)
+    // -------------------------------
+    let started = false;
+
+    window.addEventListener('click', () => {
+    if (!started) {
+        recognition.start();
+
+        setTimeout(() => {
+            speak("Welcome. How would you like us to support you today? Say Visual, Audio, or Cognitive.");
+        }, 500);
+
+        started = true;
+    }
+});
+</script>
 </body>
 </html>
