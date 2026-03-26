@@ -97,7 +97,7 @@ ${text}
     return data.response;
 }
 // -------------------- Summarize Button --------------------
-summarizeBtn.onclick =  () => {
+summarizeBtn.onclick = async () => {
     const text = inputText.value.trim();
 
     if(!text){
@@ -108,9 +108,8 @@ summarizeBtn.onclick =  () => {
     showToast('Generating AI summary...');
 
     try {
-        const summary =  aiSummarize(text);
+        const summary = await aiSummarize(text); // ✅ FIX
 
-        // format nicely
         const clean = summary.replace(/\n/g, "<br>");
 
         createSummaryBox(clean);
@@ -118,19 +117,16 @@ summarizeBtn.onclick =  () => {
         console.error(err);
         showToast('AI failed, using basic summarizer');
 
-        // fallback
-        // fallback with user input
-let wordCount = prompt("Enter summary word count:", "100");
+        let wordCount = prompt("Enter summary word count:", "100");
 
-// validate input
-if (!wordCount || isNaN(wordCount)) {
-    wordCount = 100;
-} else {
-    wordCount = parseInt(wordCount);
-}
+        if (!wordCount || isNaN(wordCount)) {
+            wordCount = 100;
+        } else {
+            wordCount = parseInt(wordCount);
+        }
 
-const fallback = extractiveSummarize(text, wordCount);
-createSummaryBox(fallback);
+        const fallback = extractiveSummarize(text, wordCount);
+        createSummaryBox(fallback);
     }
 };
 
