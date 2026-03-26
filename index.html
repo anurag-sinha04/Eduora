@@ -337,7 +337,11 @@ function speak(text) {
     // START VOICE ASSISTANT (STABLE)
     // -------------------------------
 let started = false;
-
+window.onload = () => {
+    setTimeout(() => {
+        speak("Welcome. Say get started to begin.");
+    }, 800);
+};
 window.addEventListener('click', () => {
     if (!started) {
         recognition.start();

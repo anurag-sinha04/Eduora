@@ -1,214 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Visual Support | Eduora</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        body {
-            background: #050608;
-            color: white;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-        }
-
-        .mic {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #6366f1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.5); }
-            70% { box-shadow: 0 0 0 30px rgba(99,102,241,0); }
-            100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-        }
-
-        button {
-            margin-top: 30px;
-            padding: 12px 20px;
-            background: #6366f1;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+  <title>Voice Control System</title>
 </head>
+<body style="background:black;color:white;font-family:sans-serif;text-align:center;padding:40px;">
 
-<body>
+<h1>🎤 Voice Control System</h1>
+<p id="status">Say a command...</p>
 
-    <h1>Visual Support Mode</h1>
-    <p id="status">Tap anywhere to start</p>
-
-    <div class="mic">🎤</div>
-
-    <button onclick="goBack()">Go Back</button>
 <script>
-let recognition;
-let isRunning = false;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// ---------------- 🔊 SPEAK ----------------
-function speak(text) {
-    console.log("🔊 SYSTEM:", text);
+let recognition = new SpeechRecognition();
+recognition.continuous = true;
+recognition.lang = "en-IN";
 
-    window.speechSynthesis.cancel();
+recognition.onresult = (event) => {
+  const text = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+  document.getElementById("status").innerText = text;
 
-    const msg = new SpeechSynthesisUtterance(text);
+  handleCommand(text);
+};
 
-    msg.rate = 0.9;
-    msg.pitch = 1;
-    msg.volume = 1;
+recognition.start();
 
-    const voices = window.speechSynthesis.getVoices();
-
-    msg.voice =
-        voices.find(v => v.lang === "en-IN") ||
-        voices.find(v => v.name.includes("Google")) ||
-        voices[0];
-
-    window.speechSynthesis.speak(msg);
+function speak(text){
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.rate = 0.9;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(msg);
 }
 
-// ---------------- 🎤 RECOGNITION ----------------
-const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-
-    recognition.continuous = false; // 🔥 IMPORTANT (no permission loop)
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.lang = "en-IN";
-
-    recognition.onstart = () => {
-        console.log("🎤 Mic started");
-        isRunning = true;
-        document.getElementById("status").innerText = "Listening...";
-    };
-
-    recognition.onend = () => {
-        console.log("🎤 Mic stopped");
-        isRunning = false;
-    };
-
-    recognition.onerror = (e) => {
-        console.log("❌ Error:", e.error);
-    };
-
-    recognition.onresult = (event) => {
-        const result = event.results[event.results.length - 1];
-
-        if (!result.isFinal) return;
-
-        const text = result[0].transcript.toLowerCase().trim();
-
-        console.log("🎤 USER:", text);
-
-        document.getElementById("status").innerText = "Heard: " + text;
-
-        handleCommand(text);
-
-        // ✅ restart AFTER result (safe)
-        setTimeout(() => {
-            try {
-                recognition.start();
-            } catch (e) {
-                console.log("Restart blocked");
-            }
-        }, 800);
-    };
-} else {
-    alert("Speech recognition not supported");
+function openNewTab(url){
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
-// ---------------- 🧠 COMMAND HANDLER ----------------
-function handleCommand(text) {
+function handleCommand(text){
 
-    // SIGN (handles misrecognition)
-    if (
-        text.includes("sign") ||
-        text.includes("sine") ||
-        text.includes("shine")
-    ) {
-        speak("Opening sign language");
+  // 🌍 GOOGLE
+  if(text.includes("open google")){
+    speak("Opening Google");
+    openNewTab("https://google.com");
+  }
 
-        setTimeout(() => {
-            window.location.href = "../hearing/hearing_impaired.html";
-        }, 1000);
-    }
+  // ▶️ YOUTUBE
+  else if(text.includes("open youtube")){
+    speak("Opening YouTube");
+    openNewTab("https://youtube.com");
+  }
 
-    // CALL
-    else if (text.includes("call") || text.includes("video")) {
-        speak("Opening video call");
+  // 🎵 PLAY ANYTHING
+  else if(text.startsWith("play")){
+    let query = text.replace("play", "").trim();
+    speak("Playing " + query);
+    openNewTab(`https://www.youtube.com/results?search_query=${query}`);
+  }
 
-        setTimeout(() => {
-            window.location.href = "../hearing/home.html";
-        }, 1000);
-    }
+  // 🎬 MOVIE
+  else if(text.includes("movie")){
+    let movie = text.replace("movie", "").trim();
+    speak("Searching movie " + movie);
+    openNewTab(`https://www.youtube.com/results?search_query=${movie}+trailer`);
+  }
 
-    // BACK
-    else if (text.includes("back") || text.includes("home")) {
-        speak("Going back");
+  // 🎥 VIDEO CALL
+  else if(text.includes("open video") || text.includes("video call")){
+    speak("Opening video conference");
+    openNewTab("https://visora-call.onrender.com/");
+  }
 
-        setTimeout(() => {
-            window.location.href = "../index.html";
-        }, 1000);
-    }
+  // 🌍 TRANSLATION
+  else if (
+    text.includes("vernacular") || 
+    text.includes("translation") || 
+    text.includes("translate") || 
+    text.includes("language")
+  ) {
+    speak("Opening translation");
+    openNewTab("https://speech-translator-y66c.onrender.com/");
+  }
 
-    // HELP
-    else if (text.includes("help")) {
-        speak("Say sign, call, or back.");
-    }
+  // 🔍 SEARCH
+  else if(text.startsWith("search")){
+    let query = text.replace("search", "").trim();
+    speak("Searching " + query);
+    openNewTab(`https://www.google.com/search?q=${query}`);
+  }
 
-    // UNKNOWN
-    else {
-        console.log("⚠️ No match:", text);
-        speak("Please say sign, call, or back.");
-    }
-}
+  // 📸 CAMERA
+  else if (text.includes("open camera")) {
+    speak("Opening camera");
 
-// ---------------- ▶ START SYSTEM ----------------
-window.addEventListener("click", () => {
-    if (!isRunning && recognition) {
-        try {
-            recognition.start();
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        let video = document.createElement("video");
+        video.srcObject = stream;
+        video.autoplay = true;
+        video.style.position = "fixed";
+        video.style.top = "20px";
+        video.style.right = "20px";
+        video.style.width = "300px";
+        document.body.appendChild(video);
+      })
+      .catch(() => {
+        speak("Camera access denied");
+      });
+  }
 
-            setTimeout(() => {
-                speak("Voice started. Say sign, call, or back.");
-            }, 500);
+  // 🔽 SCROLL
+  else if(text.includes("scroll down")){
+    window.scrollBy(0, 500);
+  }
 
-        } catch (e) {
-            console.log("Start error");
-        }
-    }
-});
+  else if(text.includes("scroll up")){
+    window.scrollBy(0, -500);
+  }
 
-// ---------------- AUTO MESSAGE ----------------
-window.addEventListener("DOMContentLoaded", () => {
+  // 🔙 HOME (instead of back)
+  else if (
+    text.includes("go back") || 
+    text.includes("back") || 
+    text.includes("home")
+  ) {
+    speak("Going to home page");
+
     setTimeout(() => {
-        speak("Welcome. Tap anywhere to enable voice.");
-    }, 1000);
-});
+      openNewTab("./home.html");
+    }, 800);
+  }
 
-// ---------------- NAV ----------------
-function goBack() {
-    window.location.href = "../index.html";
+  // ⌨️ TYPE
+  else if(text.startsWith("type")){
+    let words = text.replace("type", "").trim();
+    document.body.innerHTML += "<p>" + words + "</p>";
+  }
+
+  // 📄 SUMMARIZER
+  else if(text.includes("summarizer")){
+    speak("Opening summarizer");
+  }
+
+  else{
+    speak("Command not recognized");
+  }
 }
 </script>
 </body>
