@@ -336,14 +336,15 @@ function speak(text) {
     // -------------------------------
     // START VOICE ASSISTANT (STABLE)
     // -------------------------------
-    let started = false;
+let started = false;
 
-    window.addEventListener('click', () => {
+window.addEventListener('click', () => {
     if (!started) {
         recognition.start();
 
+        // 👇 FIRST MESSAGE (IMPORTANT)
         setTimeout(() => {
-            speak("Welcome. How would you like us to support you today? Say Visual, Audio, or Cognitive.");
+            speak("Welcome. Say get started to begin.");
         }, 500);
 
         started = true;
