@@ -294,24 +294,24 @@
             openPortal();
         }
 
-        else if (text.includes("visual")) {
+        else if (text.includes("visual") || text.includes("see" || text.includes("visuals") || text.includes("sea"))) {
             speak("Loading Visual Pathway");
             setTimeout(() => {
                 window.location.href = './visual/home.html';
             }, 1500);
         }
 
-        else if (text.includes("audio") || text.includes("hearing")) {
+        else if (text.includes("audio") || text.includes("hearing") || text.includes("hear")) {
             speak("Loading Audio Pathway");
             setTimeout(() => {
                 window.location.href = './hearing/home.html';
             }, 1500);
         }
 
-        else if (text.includes("focus") || text.includes("cognitive")) {
+        else if (text.includes("focus") || text.includes("cognitive") || text.includes("cognitives")) {
             speak("Loading Cognitive Pathway");
             setTimeout(() => {
-                window.location.href = './hearing/hearing_impaired.html';
+                window.location.href = './cognitive/start.html';
             }, 1500);
         }
 
