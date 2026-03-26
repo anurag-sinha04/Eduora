@@ -1,5 +1,6 @@
 # 🚀 Eduora
 
+Deployed Link: https://anurag-sinha04.github.io/Eduora/
 ### 🧠 Adaptive AI Learning Platform for Accessible Education
 
 Adaptora is an AI-powered educational platform designed to make learning **accessible, personalized, and inclusive** for students with different abilities — including visual, hearing, and cognitive challenges.
