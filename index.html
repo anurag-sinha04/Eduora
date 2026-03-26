@@ -233,15 +233,27 @@
     // -------------------------------
     // TEXT TO SPEECH (FIXED)
     // -------------------------------
-    function speak(text) {
-        window.speechSynthesis.cancel(); // stop previous speech
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.rate = 0.9;
-        msg.pitch = 1;
-        msg.volume = 1;
+function speak(text) {
+    window.speechSynthesis.cancel();
 
-        window.speechSynthesis.speak(msg);
-    }
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.rate = 0.9;
+    msg.pitch = 1;
+    msg.volume = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+
+    // 🔥 Find Indian English female voice
+    const indianVoice =
+        voices.find(v => v.lang === "en-IN" && v.name.toLowerCase().includes("female")) ||
+        voices.find(v => v.lang === "en-IN") ||
+        voices.find(v => v.name.includes("Google UK English Female")) ||
+        voices[0];
+
+    msg.voice = indianVoice;
+
+    window.speechSynthesis.speak(msg);
+}
 
     // -------------------------------
     // VOICE RECOGNITION SETUP
