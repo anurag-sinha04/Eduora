@@ -18,17 +18,14 @@
     <style>
         /* Custom styles for the dark theme and canvas */
         body {
-    background-color: #0d1117;
-    color: #c9d1d9;
-    min-height: 100vh;
-
-    /* REMOVE THESE ❌ */
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
-
-    overflow-y: auto;
-    }
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Prevent body scroll due to canvas */
+        }
         
         /* The canvas covers the entire viewport */
         #background {

@@ -69,69 +69,15 @@ function extractiveSummarize(text, wordLimit=80){
 
     return summarySentences.join(' ') || text;
 }
-// --------------------AI input ----------------------------
-async function aiSummarize(text) {
-    const response = await fetch("http://localhost:11434/api/generate", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            model: "tinyllama",
-            prompt: `
-Summarize this for a student with learning difficulty.
-Use:
-- short bullet points
-- very simple language
-- no complex words
-- maximum 6 points
 
-Text:
-${text}
-`,
-            stream: false
-        })
-    });
-
-    const data = await response.json();
-    return data.response;
-}
 // -------------------- Summarize Button --------------------
-summarizeBtn.onclick =  () => {
+summarizeBtn.onclick = () => {
     const text = inputText.value.trim();
-
-    if(!text){
-        showToast('Enter text or upload file first');
-        return;
-    }
-
-    showToast('Generating AI summary...');
-
-    try {
-        const summary =  aiSummarize(text);
-
-        // format nicely
-        const clean = summary.replace(/\n/g, "<br>");
-
-        createSummaryBox(clean);
-    } catch (err) {
-        console.error(err);
-        showToast('AI failed, using basic summarizer');
-
-        // fallback
-        // fallback with user input
-let wordCount = prompt("Enter summary word count:", "100");
-
-// validate input
-if (!wordCount || isNaN(wordCount)) {
-    wordCount = 100;
-} else {
-    wordCount = parseInt(wordCount);
-}
-
-const fallback = extractiveSummarize(text, wordCount);
-createSummaryBox(fallback);
-    }
+    if(!text){ showToast('Enter text or upload file first'); return; }
+    let wordCount = prompt("How many words should the summary be?", "80");
+    if(!wordCount || isNaN(wordCount)) wordCount=80; else wordCount=parseInt(wordCount);
+    const summary = extractiveSummarize(text, wordCount);
+    createSummaryBox(summary);
 };
 
 // -------------------- File Upload --------------------
