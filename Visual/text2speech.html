@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text-to-Speech Pro</title>
+    <style>
+        /* CSS Styles */
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            resize: none;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .setting {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        #speak-btn {
+            background-color: var(--primary);
+            color: white;
+            grid-column: span 2;
+        }
+
+        #stop-btn {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        #clear-btn {
+            background-color: #cbd5e1;
+            color: var(--text);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Text to Speech</h1>
+        
+        <textarea id="text-input" placeholder="Type or paste your text here..."></textarea>
+
+        <div class="setting">
+            <label>Select Voice</label>
+            <select id="voice-select"></select>
+        </div>
+
+        <div class="setting">
+            <label>Speed (Rate)</label>
+            <input type="range" id="rate" min="0.5" max="2" value="1" step="0.1">
+        </div>
+
+        <div class="setting">
+            <label>Pitch</label>
+            <input type="range" id="pitch" min="0" max="2" value="1" step="0.1">
+        </div>
+
+        <div class="button-group">
+            <button id="speak-btn">Speak Now</button>
+            <button id="stop-btn">Stop</button>
+            <button id="clear-btn">Clear Text</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript Logic
+        const synth = window.speechSynthesis;
+        const textInput = document.querySelector('#text-input');
+        const voiceSelect = document.querySelector('#voice-select');
+        const rateInput = document.querySelector('#rate');
+        const pitchInput = document.querySelector('#pitch');
+        const speakBtn = document.querySelector('#speak-btn');
+        const stopBtn = document.querySelector('#stop-btn');
+        const clearBtn = document.querySelector('#clear-btn');
+
+        let voices = [];
+
+        // Load voices and populate the dropdown
+        function getVoices() {
+            voices = synth.getVoices();
+            voiceSelect.innerHTML = '';
+            
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = voice.name;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        // Fix for browsers that load voices asynchronously
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = getVoices;
+        }
+        getVoices();
+
+        // Speak function
+        function speak() {
+            if (synth.speaking) {
+                synth.cancel(); // Stop if already speaking
+            }
+
+            if (textInput.value !== '') {
+                const utterance = new SpeechSynthesisUtterance(textInput.value);
+                
+                // Set the selected voice
+                const selectedVoiceName = voiceSelect.value;
+                utterance.voice = voices.find(v => v.name === selectedVoiceName);
+                
+                // Set rate and pitch
+                utterance.rate = rateInput.value;
+                utterance.pitch = pitchInput.value;
+
+                synth.speak(utterance);
+            }
+        }
+
+        // Event Listeners
+        speakBtn.addEventListener('click', speak);
+        
+        stopBtn.addEventListener('click', () => {
+            synth.cancel();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            textInput.value = '';
+            synth.cancel();
+        });
+    </script>
+</body>
+</html>

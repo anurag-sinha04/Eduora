@@ -48,7 +48,14 @@ function handleCommand(text){
     speak("Opening YouTube");
     openNewTab("https://youtube.com");
   }
-
+ else if(text.includes("open text to speech") || text.includes("speech")){
+    speak("Write text which is then converted to speech");
+    openNewTab("./text2speech.html");
+  }
+  else if(text.includes("home") || text.includes("starting")){
+    speak("Going to home page");
+    window.location.href = "../index.html";
+  }
   // 🎵 PLAY ANYTHING
   else if(text.startsWith("play")){
     let query = text.replace("play", "").trim();
@@ -120,9 +127,9 @@ function handleCommand(text){
   else if (
     text.includes("go back") || 
     text.includes("back") || 
-    text.includes("home")
+    text.includes("previous")
   ) {
-    speak("Going to home page");
+    speak("Going to previous page");
 
     setTimeout(() => {
       openNewTab("./home.html");
